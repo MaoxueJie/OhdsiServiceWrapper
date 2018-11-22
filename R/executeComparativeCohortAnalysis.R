@@ -323,8 +323,8 @@ executeComparativeCohortAnalysis <-
         connection = connection,
         tableName = paste(resultsTableQualifier,"cca_psmodel_scores",sep = "."),
         data = agg_summary,
-        dropTableIfExists = FALSE,
-        createTable = FALSE
+        dropTableIfExists = TRUE,
+        createTable = TRUE
       )
 
       # save attrition data
@@ -339,8 +339,8 @@ executeComparativeCohortAnalysis <-
         connection = connection,
         tableName = paste(resultsTableQualifier,"cca_attrition",sep = "."),
         data = attrition,
-        dropTableIfExists = FALSE,
-        createTable = FALSE
+        dropTableIfExists = TRUE,
+        createTable = TRUE
       )
 
       #evaluate covariate balance
@@ -357,8 +357,8 @@ executeComparativeCohortAnalysis <-
         connection = connection,
         tableName = paste(resultsTableQualifier,"cca_balance",sep = "."),
         data = balance,
-        dropTableIfExists = FALSE,
-        createTable = FALSE
+        dropTableIfExists = TRUE,
+        createTable = TRUE
       )
 
       # append execution identifier
@@ -387,24 +387,24 @@ executeComparativeCohortAnalysis <-
         connection = connection,
         tableName = paste(resultsTableQualifier,"cca_auc",sep = "."),
         data = auc,
-        dropTableIfExists = FALSE,
-        createTable = FALSE
+        dropTableIfExists = TRUE,
+        createTable = TRUE
       )
 
       insertTable(
         connection = connection,
         tableName = paste(resultsTableQualifier,"cca_psmodel",sep = "."),
         data = psModel,
-        dropTableIfExists = FALSE,
-        createTable = FALSE
+        dropTableIfExists = TRUE,
+        createTable = TRUE
       )
 
       insertTable(
         connection = connection,
         tableName = paste(resultsTableQualifier,"cca_pop",sep = "."),
         data = savePop,
-        dropTableIfExists = FALSE,
-        createTable = FALSE
+        dropTableIfExists = TRUE,
+        createTable = TRUE
       )
     }
 
@@ -450,8 +450,8 @@ executeComparativeCohortAnalysis <-
       connection = connection,
       tableName = paste(resultsTableQualifier,"cca_om",sep = "."),
       data = saveOm,
-      dropTableIfExists = FALSE,
-      createTable = FALSE
+      dropTableIfExists = TRUE,
+      createTable = TRUE
     )
 
     sink()

@@ -34,3 +34,5 @@ vignettes/*.pdf
 
 # Debugging files
 errorReport.txt
+
+*.project
