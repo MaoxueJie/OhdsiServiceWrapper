@@ -243,7 +243,9 @@ executeComparativeCohortAnalysis <-
       riskWindowEnd = timeAtRiskEnd,
       addExposureDaysToEnd = addExposureDaysToEnd
     )
-
+    
+	matchOrStrat <- FALSE
+	
     if (psAdjustment) {
       ps <- createPs(
         cohortMethodData = cmd,
