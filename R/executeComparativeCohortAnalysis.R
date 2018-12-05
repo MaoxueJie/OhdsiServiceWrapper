@@ -327,7 +327,7 @@ executeComparativeCohortAnalysis <-
         tableName = paste(resultsTableQualifier,"cca_psmodel_scores",sep = "."),
         data = agg_summary,
         dropTableIfExists = FALSE,
-        createTable = TRUE
+        createTable = FALSE
       )
 
       # save attrition data
@@ -343,7 +343,7 @@ executeComparativeCohortAnalysis <-
         tableName = paste(resultsTableQualifier,"cca_attrition",sep = "."),
         data = attrition,
         dropTableIfExists = FALSE,
-        createTable = TRUE
+        createTable = FALSE
       )
 
       #evaluate covariate balance
@@ -361,7 +361,7 @@ executeComparativeCohortAnalysis <-
         tableName = paste(resultsTableQualifier,"cca_balance",sep = "."),
         data = balance,
         dropTableIfExists = FALSE,
-        createTable = TRUE
+        createTable = FALSE
       )
 
       # append execution identifier
@@ -391,7 +391,7 @@ executeComparativeCohortAnalysis <-
         tableName = paste(resultsTableQualifier,"cca_auc",sep = "."),
         data = auc,
         dropTableIfExists = FALSE,
-        createTable = TRUE
+        createTable = FALSE
       )
 
       insertTable(
@@ -399,7 +399,7 @@ executeComparativeCohortAnalysis <-
         tableName = paste(resultsTableQualifier,"cca_psmodel",sep = "."),
         data = psModel,
         dropTableIfExists = FALSE,
-        createTable = TRUE
+        createTable = FALSE
       )
 
       insertTable(
@@ -407,7 +407,7 @@ executeComparativeCohortAnalysis <-
         tableName = paste(resultsTableQualifier,"cca_pop",sep = "."),
         data = savePop,
         dropTableIfExists = FALSE,
-        createTable = TRUE
+        createTable = FALSE
       )
       
       matchOrStrat <- psMatch > 0 | psStrat > 0
@@ -457,7 +457,7 @@ executeComparativeCohortAnalysis <-
       tableName = paste(resultsTableQualifier,"cca_om",sep = "."),
       data = saveOm,
       dropTableIfExists = FALSE,
-      createTable = TRUE
+      createTable = FALSE
     )
 
     sink()
