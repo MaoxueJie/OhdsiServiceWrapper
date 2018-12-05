@@ -255,6 +255,7 @@ executeComparativeCohortAnalysis <-
           useCrossValidation = TRUE
         ),
         control = createControl(
+          maxIterations = 9999,
           cvType = "auto",
           startingVariance = 0.01,
           noiseLevel = "quiet",
@@ -323,7 +324,7 @@ executeComparativeCohortAnalysis <-
         connection = connection,
         tableName = paste(resultsTableQualifier,"cca_psmodel_scores",sep = "."),
         data = agg_summary,
-        dropTableIfExists = TRUE,
+        dropTableIfExists = FALSE,
         createTable = TRUE
       )
 
@@ -339,7 +340,7 @@ executeComparativeCohortAnalysis <-
         connection = connection,
         tableName = paste(resultsTableQualifier,"cca_attrition",sep = "."),
         data = attrition,
-        dropTableIfExists = TRUE,
+        dropTableIfExists = FALSE,
         createTable = TRUE
       )
 
@@ -357,7 +358,7 @@ executeComparativeCohortAnalysis <-
         connection = connection,
         tableName = paste(resultsTableQualifier,"cca_balance",sep = "."),
         data = balance,
-        dropTableIfExists = TRUE,
+        dropTableIfExists = FALSE,
         createTable = TRUE
       )
 
@@ -387,7 +388,7 @@ executeComparativeCohortAnalysis <-
         connection = connection,
         tableName = paste(resultsTableQualifier,"cca_auc",sep = "."),
         data = auc,
-        dropTableIfExists = TRUE,
+        dropTableIfExists = FALSE,
         createTable = TRUE
       )
 
@@ -395,7 +396,7 @@ executeComparativeCohortAnalysis <-
         connection = connection,
         tableName = paste(resultsTableQualifier,"cca_psmodel",sep = "."),
         data = psModel,
-        dropTableIfExists = TRUE,
+        dropTableIfExists = FALSE,
         createTable = TRUE
       )
 
@@ -403,19 +404,22 @@ executeComparativeCohortAnalysis <-
         connection = connection,
         tableName = paste(resultsTableQualifier,"cca_pop",sep = "."),
         data = savePop,
-        dropTableIfExists = TRUE,
+        dropTableIfExists = FALSE,
         createTable = TRUE
       )
+      
+      matchOrStrat <- psMatch > 0 | psStrat > 0
+
+      if (matchOrStrat) {
+        outcomeModelPop <- strataPop
+      } else {
+        outcomeModelPop <- studyPop
+      }
+    }else{
+    	outcomeModelPop <- studyPop
     }
 
-    matchOrStrat <- psMatch > 0 | psStrat > 0
-
-    if (matchOrStrat) {
-      outcomeModelPop <- strataPop
-    } else {
-      outcomeModelPop <- studyPop
-    }
-
+    
     modelName <- "logistic"
 
     if (modelType == 1) {
@@ -450,7 +454,7 @@ executeComparativeCohortAnalysis <-
       connection = connection,
       tableName = paste(resultsTableQualifier,"cca_om",sep = "."),
       data = saveOm,
-      dropTableIfExists = TRUE,
+      dropTableIfExists = FALSE,
       createTable = TRUE
     )
 
