@@ -456,6 +456,18 @@ executeComparativeCohortAnalysis <-
       includeCovariateIds = omIncludedConcepts,
       excludeCovariateIds = omExcludedConcepts
     )
+	
+	if (outcomeModel$outcomeModelStatus != "OK")
+	{
+		warnings <- data.frame(execution_id = executionId,type = 2,warnings = outcomeModel$outcomeModelStatus)
+		insertTable(
+				connection = connection,
+				tableName = paste(resultsTableQualifier,"cca_warnings",sep = "."),
+				data = warnings,
+				dropTableIfExists = FALSE,
+				createTable = FALSE
+		)
+	}
 
     omEstimate <- outcomeModel$outcomeModelTreatmentEstimate
     saveOm <-
