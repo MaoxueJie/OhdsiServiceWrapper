@@ -266,157 +266,170 @@ executeComparativeCohortAnalysis <-
           threads = 10
         )
       )
-
-      auc <- computePsAuc(ps)
-
-      psModel <- getPsModel(propensityScore = ps,
-                            cohortMethodData = cmd)
-
-      strataPop <- ps
-
-      if (psTrimFraction > 0) {
-        psTrimFraction <- psTrimFraction / 100
-      }
-
-      if (psTrim == 1) {
-        strataPop <- trimByPs(strataPop, trimFraction = psTrimFraction)
-      } else if (psTrim == 2) {
-        strataPop <-
-          trimByPsToEquipoise(strataPop, bounds = c(psTrimFraction, 1 - psTrimFraction))
-      }
-
-      if (psMatch == 1) {
-        strataPop <- matchOnPs(
-          strataPop,
-          caliper = 0.25,
-          caliperScale = "standardized",
-          maxRatio = psMatchMaxRatio
-        )
-      } else if (psMatch == 2) {
-        strataPop <-
-          stratifyByPs(strataPop,numberOfStrata = psStratNumStrata)
-      }
-
-      # generate aggregates for propensity score plot
-      workingPs <- strataPop
-      workingPs$propensityScore <-
-        round(workingPs$propensityScore,2)
-      workingPs$preferenceScore <-
-        round(workingPs$preferenceScore,2)
-      aggregates <- aggregate(
-        workingPs$rowId,
-        by = list(workingPs$propensityScore, workingPs$preferenceScore, workingPs$treatment),
-        FUN = length
-      )
-
-      treatment_aggregates <-
-        aggregates[aggregates$Group.3 == 1,c(1,2,4)]
-      comparator_aggregates <-
-        aggregates[aggregates$Group.3 == 0,c(1,2,4)]
-
-      agg_summary <-
-        merge(treatment_aggregates, comparator_aggregates,by = c("Group.1","Group.2"),all = TRUE)
-      agg_summary[is.na(agg_summary)] <- 0
-      colnames(agg_summary) <- c("propensity_score", "preference_score", "treatment", "comparator")
-      agg_summary <-
-        data.frame(execution_id = executionId, agg_summary)
-
-      # save results to database
-      insertTable(
-        connection = connection,
-        tableName = paste(resultsTableQualifier,"cca_psmodel_scores",sep = "."),
-        data = agg_summary,
-        dropTableIfExists = FALSE,
-        createTable = FALSE
-      )
-
-      # save attrition data
-      attrition <- getAttritionTable(strataPop)
-      attrition <-
-        cbind(executionId = executionId, attrition)
-      attrition$attritionOrder <- seq.int(nrow(attrition))
-      colnames(attrition) <-
-        SqlRender::camelCaseToSnakeCase(colnames(attrition))
-
-      insertTable(
-        connection = connection,
-        tableName = paste(resultsTableQualifier,"cca_attrition",sep = "."),
-        data = attrition,
-        dropTableIfExists = FALSE,
-        createTable = FALSE
-      )
-
-      #evaluate covariate balance
-
-      balance <- computeCovariateBalance(strataPop,cmd)
-      colnames(balance)[colnames(balance) == "beforeMatchingsumComparator"] <-
-        "beforeMatchingSumComparator"
-      balance <-
-        cbind(executionId = executionId, balance)
-      colnames(balance) <-
-        SqlRender::camelCaseToSnakeCase(colnames(balance))
-
-      insertTable(
-        connection = connection,
-        tableName = paste(resultsTableQualifier,"cca_balance",sep = "."),
-        data = balance,
-        dropTableIfExists = FALSE,
-        createTable = FALSE
-      )
-
-      # append execution identifier
-      auc <-
-        data.frame(executionId = executionId, auc = auc)
-      psModel <-
-        cbind(executionId = executionId, psModel)
-
-      savePop <-
-        cbind(executionId = executionId, strataPop)
-      savePop$propensityScore <-
-        round(savePop$propensityScore,2)
-      savePop$preferenceScore <-
-        round(savePop$preferenceScore,2)
-
-      # rename columns to snake case
-      colnames(auc) <-
-        SqlRender::camelCaseToSnakeCase(colnames(auc))
-      colnames(psModel) <-
-        SqlRender::camelCaseToSnakeCase(colnames(psModel))
-      colnames(savePop) <-
-        SqlRender::camelCaseToSnakeCase(colnames(savePop))
-
-      # save results to database
-      insertTable(
-        connection = connection,
-        tableName = paste(resultsTableQualifier,"cca_auc",sep = "."),
-        data = auc,
-        dropTableIfExists = FALSE,
-        createTable = FALSE
-      )
-
-      insertTable(
-        connection = connection,
-        tableName = paste(resultsTableQualifier,"cca_psmodel",sep = "."),
-        data = psModel,
-        dropTableIfExists = FALSE,
-        createTable = FALSE
-      )
-
-      insertTable(
-        connection = connection,
-        tableName = paste(resultsTableQualifier,"cca_pop",sep = "."),
-        data = savePop,
-        dropTableIfExists = FALSE,
-        createTable = FALSE
-      )
-      
-      matchOrStrat <- psMatch > 0 | psStrat > 0
-
-      if (matchOrStrat) {
-        outcomeModelPop <- strataPop
-      } else {
-        outcomeModelPop <- studyPop
-      }
+	  
+	  if (is.character(ps))
+	  {
+		  warnings <- data.frame(execution_id = executionId,type = 1,warnings = ps)
+		  insertTable(
+				  connection = connection,
+				  tableName = paste(resultsTableQualifier,"cca_warnings",sep = "."),
+				  data = warnings,
+				  dropTableIfExists = FALSE,
+				  createTable = FALSE
+		  )
+	  }else
+	  {
+	      auc <- computePsAuc(ps)
+	
+	      psModel <- getPsModel(propensityScore = ps,
+	                            cohortMethodData = cmd)
+	
+	      strataPop <- ps
+	
+	      if (psTrimFraction > 0) {
+	        psTrimFraction <- psTrimFraction / 100
+	      }
+	
+	      if (psTrim == 1) {
+	        strataPop <- trimByPs(strataPop, trimFraction = psTrimFraction)
+	      } else if (psTrim == 2) {
+	        strataPop <-
+	          trimByPsToEquipoise(strataPop, bounds = c(psTrimFraction, 1 - psTrimFraction))
+	      }
+	
+	      if (psMatch == 1) {
+	        strataPop <- matchOnPs(
+	          strataPop,
+	          caliper = 0.25,
+	          caliperScale = "standardized",
+	          maxRatio = psMatchMaxRatio
+	        )
+	      } else if (psMatch == 2) {
+	        strataPop <-
+	          stratifyByPs(strataPop,numberOfStrata = psStratNumStrata)
+	      }
+	
+	      # generate aggregates for propensity score plot
+	      workingPs <- strataPop
+	      workingPs$propensityScore <-
+	        round(workingPs$propensityScore,2)
+	      workingPs$preferenceScore <-
+	        round(workingPs$preferenceScore,2)
+	      aggregates <- aggregate(
+	        workingPs$rowId,
+	        by = list(workingPs$propensityScore, workingPs$preferenceScore, workingPs$treatment),
+	        FUN = length
+	      )
+	
+	      treatment_aggregates <-
+	        aggregates[aggregates$Group.3 == 1,c(1,2,4)]
+	      comparator_aggregates <-
+	        aggregates[aggregates$Group.3 == 0,c(1,2,4)]
+	
+	      agg_summary <-
+	        merge(treatment_aggregates, comparator_aggregates,by = c("Group.1","Group.2"),all = TRUE)
+	      agg_summary[is.na(agg_summary)] <- 0
+	      colnames(agg_summary) <- c("propensity_score", "preference_score", "treatment", "comparator")
+	      agg_summary <-
+	        data.frame(execution_id = executionId, agg_summary)
+	
+	      # save results to database
+	      insertTable(
+	        connection = connection,
+	        tableName = paste(resultsTableQualifier,"cca_psmodel_scores",sep = "."),
+	        data = agg_summary,
+	        dropTableIfExists = FALSE,
+	        createTable = FALSE
+	      )
+	
+	      # save attrition data
+	      attrition <- getAttritionTable(strataPop)
+	      attrition <-
+	        cbind(executionId = executionId, attrition)
+	      attrition$attritionOrder <- seq.int(nrow(attrition))
+	      colnames(attrition) <-
+	        SqlRender::camelCaseToSnakeCase(colnames(attrition))
+	
+	      insertTable(
+	        connection = connection,
+	        tableName = paste(resultsTableQualifier,"cca_attrition",sep = "."),
+	        data = attrition,
+	        dropTableIfExists = FALSE,
+	        createTable = FALSE
+	      )
+	
+	      #evaluate covariate balance
+	
+	      balance <- computeCovariateBalance(strataPop,cmd)
+	      colnames(balance)[colnames(balance) == "beforeMatchingsumComparator"] <-
+	        "beforeMatchingSumComparator"
+	      balance <-
+	        cbind(executionId = executionId, balance)
+	      colnames(balance) <-
+	        SqlRender::camelCaseToSnakeCase(colnames(balance))
+	
+	      insertTable(
+	        connection = connection,
+	        tableName = paste(resultsTableQualifier,"cca_balance",sep = "."),
+	        data = balance,
+	        dropTableIfExists = FALSE,
+	        createTable = FALSE
+	      )
+	
+	      # append execution identifier
+	      auc <-
+	        data.frame(executionId = executionId, auc = auc)
+	      psModel <-
+	        cbind(executionId = executionId, psModel)
+	
+	      savePop <-
+	        cbind(executionId = executionId, strataPop)
+	      savePop$propensityScore <-
+	        round(savePop$propensityScore,2)
+	      savePop$preferenceScore <-
+	        round(savePop$preferenceScore,2)
+	
+	      # rename columns to snake case
+	      colnames(auc) <-
+	        SqlRender::camelCaseToSnakeCase(colnames(auc))
+	      colnames(psModel) <-
+	        SqlRender::camelCaseToSnakeCase(colnames(psModel))
+	      colnames(savePop) <-
+	        SqlRender::camelCaseToSnakeCase(colnames(savePop))
+	
+	      # save results to database
+	      insertTable(
+	        connection = connection,
+	        tableName = paste(resultsTableQualifier,"cca_auc",sep = "."),
+	        data = auc,
+	        dropTableIfExists = FALSE,
+	        createTable = FALSE
+	      )
+	
+	      insertTable(
+	        connection = connection,
+	        tableName = paste(resultsTableQualifier,"cca_psmodel",sep = "."),
+	        data = psModel,
+	        dropTableIfExists = FALSE,
+	        createTable = FALSE
+	      )
+	
+	      insertTable(
+	        connection = connection,
+	        tableName = paste(resultsTableQualifier,"cca_pop",sep = "."),
+	        data = savePop,
+	        dropTableIfExists = FALSE,
+	        createTable = FALSE
+	      )
+	      
+	      matchOrStrat <- psMatch > 0 | psStrat > 0
+	
+	      if (matchOrStrat) {
+	        outcomeModelPop <- strataPop
+	      } else {
+	        outcomeModelPop <- studyPop
+	      }
+	  }
     }else{
     	outcomeModelPop <- studyPop
     }
