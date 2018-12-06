@@ -269,6 +269,8 @@ executeComparativeCohortAnalysis <-
 	  
 	  if (is.character(ps))
 	  {
+		  outcomeModelPop <- studyPop
+		  
 		  warnings <- data.frame(execution_id = executionId,type = 1,warnings = ps)
 		  insertTable(
 				  connection = connection,
