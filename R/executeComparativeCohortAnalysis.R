@@ -233,6 +233,21 @@ executeComparativeCohortAnalysis <-
       excludeDrugsFromCovariates = FALSE,
       covariateSettings = covariateSettings
     )
+	
+	if (is.character(cmd))
+	{
+		outcomeModelPop <- studyPop
+		
+		warnings <- data.frame(execution_id = executionId,type = 1,warnings = cmd)
+		insertTable(
+				connection = connection,
+				tableName = paste(resultsTableQualifier,"cca_warnings",sep = "."),
+				data = warnings,
+				dropTableIfExists = FALSE,
+				createTable = FALSE
+		)
+		stop(cmd);
+	}
 
     studyPop <- createStudyPopulation(
       cohortMethodData = cmd,
